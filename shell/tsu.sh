@@ -288,9 +288,19 @@ done
 
 ### TODO: Implement this cleanly.
 
+### ----- RISH4TERMUX
+# Because the rish need the access to termux files, only sui and shizuku started with root access can work with tsu.
+# Shizuku started with ADB access can only grant shell access so it will show "Permission denied".
+# In that case please use the original tsu.
+# rish doesn't support to preserve environment nor switch user. If trying to do so it will not use rish and try other root access provider.
+if [[ -z $NO_RISH && -z "$SWITCH_USER" && -z $ENVIRONMENT_PRESERVE ]] && command -v rish>/dev/null 2>&1; then
+	su_args=$(command -v rish)
+	su_cmdline="PATH=$ANDROID_SYSPATHS env -i $ENV_BUILT $STARTUP_SCRIPT"
+	su_args+=("-c")
+	exec "${su_args[@]}" "${su_cmdline}"
 ### ----- MAGISKSU
 # shellcheck disable=SC2117
-if [[ -z "$SKIP_SBIN" && "$(/sbin/su -v)" == *"MAGISKSU" ]]; then
+elif [[ -z "$SKIP_SBIN" && "$(/sbin/su -v)" == *"MAGISKSU" ]]; then
 	# We are on Magisk su
 	su_args=("/sbin/su")
 	[[ -z "$SWITCH_USER" ]] || su_args+=("$SWITCH_USER")
